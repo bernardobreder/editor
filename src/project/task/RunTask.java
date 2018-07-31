@@ -16,53 +16,54 @@ import project.filesystem.FSFile;
 
 public class RunTask implements Task {
 
-	private ConsolePanel consolePanel;
+  private ConsolePanel consolePanel;
 
-	private FSFile file;
+  private FSFile file;
 
-	private ConsoleInstance consoleInstance;
+  private ConsoleInstance consoleInstance;
 
-	public RunTask(ConsolePanel consolePanel, FSFile file) {
-		this.consolePanel = consolePanel;
-		this.file = file;
-	}
+  public RunTask(ConsolePanel consolePanel, FSFile file) {
+    this.consolePanel = consolePanel;
+    this.file = file;
+  }
 
-	@Override
-	public void perform() throws Exception {
-		consoleInstance = TaskQueue.execute(new TaskQuery<ConsoleInstance>() {
+  @Override
+  public void perform() throws Exception {
+    consoleInstance = TaskQueue.execute(new TaskQuery<ConsoleInstance>() {
 
-			@Override
-			public ConsoleInstance execute() {
-				return consolePanel.createInstance();
-			}
-		});
-		new OSProcess(new ProcessModel() {
+      @Override
+      public ConsoleInstance execute() {
+        return consolePanel.createInstance();
+      }
+    });
+    new OSProcess(new ProcessModel() {
 
-			@Override
-			public void receiveLine(String line, boolean isError) {
-				write(line);
-			}
-		}, Arrays.asList("make", "run")).setFolder(file.getProject()).start().waitForExit();
-	}
+      @Override
+      public void receiveLine(String line, boolean isError) {
+        write(line);
+      }
+    }, Arrays.asList("make", "run")).setFolder(file.getProject()
+      .toExternalFile()).start().waitForExit();
+  }
 
-	@Override
-	public void updateUI() {
-		consoleInstance.close();
-	}
+  @Override
+  public void updateUI() {
+    consoleInstance.close();
+  }
 
-	@Override
-	public String getTitle() {
-		return "Running project";
-	}
+  @Override
+  public String getTitle() {
+    return "Running project";
+  }
 
-	protected void write(final String line) {
-		SwingUtilities.invokeLater(new Runnable() {
+  protected void write(final String line) {
+    SwingUtilities.invokeLater(new Runnable() {
 
-			@Override
-			public void run() {
-				consoleInstance.write(line + "\n");
-			}
-		});
-	}
+      @Override
+      public void run() {
+        consoleInstance.write(line + "\n");
+      }
+    });
+  }
 
 }
